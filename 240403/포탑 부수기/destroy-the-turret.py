@@ -92,7 +92,7 @@ for time in range(K):
     
     # bomb
     if min_direc is None:
-        min_direc = [(rx, ry)]
+        min_direc = [(ax, ay), (rx, ry)]
         for dx, dy in direc:
             nx, ny = (rx+dx)%N, (ry+dy)%M
             if arr[nx][ny] == 0:
