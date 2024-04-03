@@ -65,7 +65,7 @@ for time in range(K):
         candits.append((arr[x][y], time-attack_time[(x, y)], x+y, y, x))
 
     _, _, _, ay, ax = sorted(candits, key=lambda x: (x[0], x[1], -x[2], -x[3]))[0]
-    _, _, _, ry, rx = sorted(candits, key=lambda x: (-x[0], x[1], x[2], x[3]))[0]
+    _, _, _, ry, rx = sorted(candits, key=lambda x: (-x[0], -x[1], x[2], x[3]))[0]
     attack_time[(ax, ay)] = time+1
     arr[ax][ay] += (N+M)
 
@@ -92,7 +92,7 @@ for time in range(K):
     
     # bomb
     if min_direc is None:
-        min_direc = [(ax, ay), (rx, ry)]
+        min_direc = [(rx, ry)]
         for dx, dy in direc:
             nx, ny = (rx+dx)%N, (ry+dy)%M
             if arr[nx][ny] == 0:
