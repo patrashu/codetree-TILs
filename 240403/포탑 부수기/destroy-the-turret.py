@@ -62,8 +62,9 @@ for time in range(K):
     for x, y in alive:
         candits.append((arr[x][y], time-attack_time[(x, y)], x+y, y, x))
 
-    _, _, _, ay, ax = sorted(candits, key=lambda x: (x[0], x[1], -x[2], -x[3]))[0]
-    _, _, _, ry, rx = sorted(candits, key=lambda x: (-x[0], -x[1], x[2], x[3]))[0]
+    candits = sorted(candits, key=lambda x: (x[0], x[1], -x[2], -x[3]))
+    _, _, _, ay, ax = candits[0]
+    _, _, _, ry, rx = candits[-1]
     attack_time[(ax, ay)] = time+1
     arr[ax][ay] += (N+M)
 
