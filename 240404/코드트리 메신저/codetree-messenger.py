@@ -23,7 +23,7 @@
 (5). 알림을 받을 수 있는 채팅방 수 조회
 - c번 채팅방까지 도달할 수 있는 서로 다른 채팅방 수를 출력
 """
-from collections import deque
+from collections import deque, defaultdict
 
 class Node:
     def __init__(self, value):
@@ -40,28 +40,25 @@ class Tree:
         self.idx_to_node = {0: [None, self.head]}
         self.status = None
         self.authority = None
-        self.tmp = {}
 
     def set_node(self, arr, authority):
         self.status = [True] * (len(arr)+1)
         self.authority = [0] + authority
+        tmp = defaultdict(list)
 
-        arr = [(idx, parent) for idx, parent in enumerate(arr)]
-        arr.sort(key=lambda x: x[1])
-        for cur, parent in arr:
-            new_node = None
-            if self.tmp.get(cur+1, -1) != -1:
-                new_node = self.tmp.get(cur+1)
-                del self.tmp[cur+1]
-            else:
-                new_node = Node(cur+1)
-            try:
-                pnode = self.idx_to_node[parent][1]
-            except:
-                pnode = Node(parent)
-                self.tmp[parent] = pnode
-            pnode.children.append(new_node)
-            self.idx_to_node[cur+1] = [parent, new_node]
+        for idx, parent in enumerate(arr):
+            tmp[parent].append(idx+1)
+
+        dq = deque([self.head])
+        while dq:
+            cnode = dq.popleft()
+            v = cnode.value
+            for nnode in tmp[v]:
+                new_node = Node(nnode)
+                self.idx_to_node[nnode] = [v, new_node]
+                cnode.children.append(new_node)
+                dq.append(new_node)
+
 
 def convert_status(tree, node):
     tree.status[node] = True if not tree.status[node] else False
@@ -75,17 +72,21 @@ def convert_parent(tree, node1, node2):
     pnode1 = tree.idx_to_node[pnode1][1]
     pnode2 = tree.idx_to_node[pnode2][1]
 
-    for i, child in enumerate(pnode1.children):
-        if child == node1:
-            break
-    pnode1.children.pop(i)
-    pnode1.children.append(node2)
+    if len(pnode1.children) == 2:
+        if pnode1.children[0] == node1:
+            pnode1.children[0] = node2
+        else:
+            pnode1.children[1] = node2
+    else:
+        pnode1.children[0] = node2
 
-    for i, child in enumerate(pnode2.children):
-        if child == node2:
-            break
-    pnode2.children.pop(i)
-    pnode2.children.append(node1)
+    if len(pnode2.children) == 2:
+        if pnode2.children[0] == node2:
+            pnode2.children[0] = node1
+        else:
+            pnode2.children[1] = node1
+    else:
+        pnode2.children[0] = node1
 
 def search(tree, node):
     snode = tree.idx_to_node[node][1]
@@ -103,17 +104,6 @@ def search(tree, node):
             dq.append((nnode, depth+1))
     return cnt
 
-def print_tree(tree):
-    node = tree.head
-    dq = deque([node])
-    while dq:
-        cnode = dq.popleft()
-        for i, nnode in enumerate(cnode.children):
-            if i == 0:
-                print(f"cur:{cnode.value}, left: {nnode.value}")
-            else:
-                print(f"cur:{cnode.value}, right: {nnode.value}")
-            dq.append(nnode)
 
 if __name__ == '__main__':
     N, Q = map(int, input().split())
@@ -131,5 +121,3 @@ if __name__ == '__main__':
             convert_parent(tree, line[0], line[1])
         elif cmd == 500:
             print(search(tree, line[0]))
-
-    print_tree(tree)
