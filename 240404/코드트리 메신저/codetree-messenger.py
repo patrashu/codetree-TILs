@@ -86,6 +86,8 @@ def search(tree, node):
 
     while dq:
         cnode, depth = dq.popleft()
+        if len(cnode.children) == 0:
+            continue
         for nnode in cnode.children:
             v = nnode.value
             if not tree.status[v]:
