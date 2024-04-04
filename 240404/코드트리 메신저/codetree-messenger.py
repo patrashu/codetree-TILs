@@ -45,7 +45,10 @@ class Tree:
         self.status = [True] * (len(arr)+1)
         self.authority = [0] + authority
 
-        for cur, parent in enumerate(arr):
+        arr = [(idx, parent) for idx, parent in enumerate(arr)]
+        arr.sort(key=lambda x: x[1])
+
+        for cur, parent in arr:
             new_node = Node(cur+1)
             if parent == 0:
                 self.head.children.append(new_node)
