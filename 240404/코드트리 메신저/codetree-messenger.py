@@ -88,9 +88,10 @@ def search(tree, node):
         cnode, depth = dq.popleft()
         for nnode in cnode.children:
             v = nnode.value
-            if not tree.status[v] or tree.authority[v] < depth+1:
+            if not tree.status[v]:
                 continue
-            cnt += 1
+            if tree.authority[v] >= depth+1:
+                cnt += 1
             dq.append((nnode, depth+1))
     return cnt
 
