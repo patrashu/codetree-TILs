@@ -55,22 +55,11 @@ class Tree:
                 del self.tmp[cur+1]
             else:
                 new_node = Node(cur+1)
-            
             try:
                 pnode = self.idx_to_node[parent][1]
             except:
                 pnode = Node(parent)
                 self.tmp[parent] = pnode
-            # if parent == 0:
-            #     self.head.children.append(new_node)
-            # else:
-            #     try:
-            #         pnode = self.idx_to_node[parent][1]
-            #         pnode.children.append(new_node)
-            #     except:
-            #         pnode = Node(parent)
-            #         self.tmp[parent] = pnode
-            #         pnode.children.append(new_node)
             pnode.children.append(new_node)
             self.idx_to_node[cur+1] = [parent, new_node]
 
@@ -114,6 +103,18 @@ def search(tree, node):
             dq.append((nnode, depth+1))
     return cnt
 
+def print_tree(tree):
+    node = tree.head
+    dq = deque([node])
+    while dq:
+        cnode = dq.popleft()
+        for i, nnode in enumerate(cnode.children):
+            if i == 0:
+                print(f"cur:{cnode.value}, left: {nnode.value}")
+            else:
+                print(f"cur:{cnode.value}, right: {nnode.value}")
+            dq.append(nnode)
+
 if __name__ == '__main__':
     N, Q = map(int, input().split())
     tree = None
@@ -130,3 +131,5 @@ if __name__ == '__main__':
             convert_parent(tree, line[0], line[1])
         elif cmd == 500:
             print(search(tree, line[0]))
+
+    print_tree(tree)
