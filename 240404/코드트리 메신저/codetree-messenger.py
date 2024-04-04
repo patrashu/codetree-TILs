@@ -1,123 +1,126 @@
-"""
-이진 트리란 모든 노드의 자식이 2개 이하인 트리
+MAX_N = 100001
+MAX_D = 22
 
-(1). 사내 메신저 준비
-- 0~N번까지 N+1개의 채팅방이 있으며, 회사의 메인 채팅방을 제외한 각 채팅방은 부모 채팅방이 있음
-- 메인 : 항상 0, 각 채팅방의 부모 채팅방 번호는 parents로 주어짐
-- 각 채팅방은 권한을 가지고 있음
-- authority만큼 상위로 올라가서 알림을 보냄
-- 0번 채팅방은 아무 관련 없음
+n, q = 0, 0
+a, p, val = [0] * MAX_N, [0] * MAX_N, [0] * MAX_N
+noti = [False] * MAX_N
+nx = [[0 for _ in range(MAX_D)] for _ in range(MAX_N)]
 
-(2). 알림망 설정 ON/OFF
-- 첨엔 다 ON
-- 기능 작동시 ON -> OFF / OFF -> ON으로 바꿔줌
-- 알림 OFF면 나 포함 위로 알림올리지 않음
+# 초기 설정 값을 받아옵니다.
+def init(inputs):
+    global n, a, p, val, nx
+    # 부모 채팅과 채팅의 권한 정보를 입력받습니다.
+    for i in range(1, n + 1):
+        p[i] = inputs[i]
+    
+    for i in range(1, n + 1):
+        a[i] = inputs[i + n]
+        # 채팅의 권한이 20을 초과하는 경우 20으로 제한합니다.
+        if a[i] > 20:
+            a[i] = 20
+    
+    # nx 배열과 val 값을 초기화합니다.
+    for i in range(1, n + 1):
+        cur = i
+        x = a[i]
+        nx[cur][x] += 1
+        # 상위 채팅으로 이동하며 nx와 val 값을 갱신합니다.
+        while p[cur] and x:
+            cur = p[cur]
+            x -= 1
+            if x:
+                nx[cur][x] += 1
+            val[cur] += 1
 
-(3). 권한 세기 변경
-- c번 채팅방 권한 세기를 power로 변경
+# 채팅의 알림 상태를 토글합니다.
+def toggle_noti(chat):
+    cur = p[chat]
+    num = 1
+    # 상위 채팅으로 이동하며 noti 값에 따라 nx와 val 값을 갱신합니다.
+    while cur:
+        for i in range(num, 22):
+            val[cur] += nx[chat][i] if noti[chat] else -nx[chat][i]
+            if i > num:
+                nx[cur][i - num] += nx[chat][i] if noti[chat] else -nx[chat][i]
+        if noti[cur]:
+            break
+        cur = p[cur]
+        num += 1
+    noti[chat] = not noti[chat]
 
-(4). 부모 교환
-- 동일 level의 c1 부모와 c2 부모를 서로 바꿈
-- 자식도 함께 딸려감
+# 채팅의 권한의 크기를 변경합니다.
+def change_power(chat, power):
+    bef_power = a[chat]
+    power = min(power, 20)  # 권한의 크기를 20으로 제한합니다.
+    a[chat] = power
 
-(5). 알림을 받을 수 있는 채팅방 수 조회
-- c번 채팅방까지 도달할 수 있는 서로 다른 채팅방 수를 출력
-"""
-from collections import deque, defaultdict
+    nx[chat][bef_power] -= 1
+    if not noti[chat]:
+        cur = p[chat]
+        num = 1
+        # 상위 채팅으로 이동하며 nx와 val 값을 갱신합니다.
+        while cur:
+            if bef_power >= num:
+                val[cur] -= 1
+            if bef_power > num:
+                nx[cur][bef_power - num] -= 1
+            if noti[cur]:
+                break
+            cur = p[cur]
+            num += 1
 
-class Node:
-    def __init__(self, value):
-        self.value = value
-        self.children = []
+    nx[chat][power] += 1
+    if not noti[chat]:
+        cur = p[chat]
+        num = 1
+        # 상위 채팅으로 이동하며 nx와 val 값을 갱신합니다.
+        while cur:
+            if power >= num:
+                val[cur] += 1
+            if power > num:
+                nx[cur][power - num] += 1
+            if noti[cur]:
+                break
+            cur = p[cur]
+            num += 1
 
-    def add_children(self, node):
-        self.children.append(node)
+# 두 채팅의 부모를 교체합니다.
+def change_parent(chat1, chat2):
+    bef_noti1 = noti[chat1]
+    bef_noti2 = noti[chat2]
 
+    if not noti[chat1]:
+        toggle_noti(chat1)
+    if not noti[chat2]:
+        toggle_noti(chat2)
 
-class Tree:
-    def __init__(self):
-        self.head = Node(0)
-        self.idx_to_node = {0: [None, self.head]}
-        self.status = None
-        self.authority = None
+    p[chat1], p[chat2] = p[chat2], p[chat1]
 
-    def set_node(self, arr, authority):
-        self.status = [True] * (len(arr)+1)
-        self.authority = [0] + authority
-        tmp = defaultdict(list)
+    if not bef_noti1:
+        toggle_noti(chat1)
+    if not bef_noti2:
+        toggle_noti(chat2)
 
-        for idx, parent in enumerate(arr):
-            tmp[parent].append(idx+1)
-
-        dq = deque([self.head])
-        while dq:
-            cnode = dq.popleft()
-            v = cnode.value
-            for nnode in tmp[v]:
-                new_node = Node(nnode)
-                self.idx_to_node[nnode] = [v, new_node]
-                cnode.children.append(new_node)
-                dq.append(new_node)
-
-
-def convert_status(tree, node):
-    tree.status[node] = True if not tree.status[node] else False
-
-def convert_power(tree, node, power):
-    tree.authority[node] = power
-
-def convert_parent(tree, node1, node2):
-    pnode1, node1 = tree.idx_to_node[node1]
-    pnode2, node2 = tree.idx_to_node[node2]
-    pnode1 = tree.idx_to_node[pnode1][1]
-    pnode2 = tree.idx_to_node[pnode2][1]
-
-    if len(pnode1.children) == 2:
-        if pnode1.children[0] == node1:
-            pnode1.children[0] = node2
-        else:
-            pnode1.children[1] = node2
-    else:
-        pnode1.children[0] = node2
-
-    if len(pnode2.children) == 2:
-        if pnode2.children[0] == node2:
-            pnode2.children[0] = node1
-        else:
-            pnode2.children[1] = node1
-    else:
-        pnode2.children[0] = node1
-
-def search(tree, node):
-    snode = tree.idx_to_node[node][1]
-    dq = deque([(snode, 0)])
-    cnt = 0
-
-    while dq:
-        cnode, depth = dq.popleft()
-        for nnode in cnode.children:
-            v = nnode.value
-            if not tree.status[v]:
-                continue
-            if tree.authority[v] >= depth+1:
-                cnt += 1
-            dq.append((nnode, depth+1))
-    return cnt
+# 해당 채팅의 val 값을 출력합니다.
+def print_count(chat):
+    print(val[chat])
 
 
-if __name__ == '__main__':
-    N, Q = map(int, input().split())
-    tree = None
-    for _ in range(Q):
-        cmd, *line = list(map(int, input().split()))
-        if cmd == 100:
-            tree = Tree()
-            tree.set_node(line[:N], line[N:])
-        elif cmd == 200:
-            convert_status(tree, line[0])
-        elif cmd == 300:
-            convert_power(tree, line[0], line[1])
-        elif cmd == 400:
-            convert_parent(tree, line[0], line[1])
-        elif cmd == 500:
-            print(search(tree, line[0]))
+n, q = map(int, input().split())
+for _ in range(q):
+    inputs = list(map(int, input().split()))
+    query = inputs[0]
+    if query == 100:
+        init(inputs)
+    elif query == 200:
+        chat = inputs[1]
+        toggle_noti(chat)
+    elif query == 300:
+        chat, power = inputs[1], inputs[2]
+        change_power(chat, power)
+    elif query == 400:
+        chat1, chat2 = inputs[1], inputs[2]
+        change_parent(chat1, chat2)
+    elif query == 500:
+        chat = inputs[1]
+        print_count(chat)
