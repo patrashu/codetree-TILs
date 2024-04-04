@@ -37,9 +37,10 @@ class Node:
 class Tree:
     def __init__(self):
         self.head = Node(0)
-        self.idx_to_node = {}
+        self.idx_to_node = {0: [None, self.head]}
         self.status = None
         self.authority = None
+        self.tmp = {}
 
     def set_node(self, arr, authority):
         self.status = [True] * (len(arr)+1)
@@ -47,16 +48,23 @@ class Tree:
 
         arr = [(idx, parent) for idx, parent in enumerate(arr)]
         arr.sort(key=lambda x: x[1])
-
         for cur, parent in arr:
-            new_node = Node(cur+1)
+            new_node = None
+            if self.tmp.get(cur+1, -1) != -1:
+                new_node = self.tmp.get(cur+1)
+            else:
+                new_node = Node(cur+1)
             if parent == 0:
                 self.head.children.append(new_node)
             else:
-                pnode = self.idx_to_node[parent][1]
-                pnode.children.append(new_node)
+                try:
+                    pnode = self.idx_to_node[parent][1]
+                    pnode.children.append(new_node)
+                except:
+                    pnode = Node(parent)
+                    self.tmp[parent] = pnode
+                    pnode.children.append(new_node)
             self.idx_to_node[cur+1] = [parent, new_node]
-
 
 def convert_status(tree, node):
     tree.status[node] = True if not tree.status[node] else False
