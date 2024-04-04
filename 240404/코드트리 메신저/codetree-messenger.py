@@ -52,18 +52,26 @@ class Tree:
             new_node = None
             if self.tmp.get(cur+1, -1) != -1:
                 new_node = self.tmp.get(cur+1)
+                del self.tmp[cur+1]
             else:
                 new_node = Node(cur+1)
-            if parent == 0:
-                self.head.children.append(new_node)
-            else:
-                try:
-                    pnode = self.idx_to_node[parent][1]
-                    pnode.children.append(new_node)
-                except:
-                    pnode = Node(parent)
-                    self.tmp[parent] = pnode
-                    pnode.children.append(new_node)
+            
+            try:
+                pnode = self.idx_to_node[parent][1]
+            except:
+                pnode = Node(parent)
+                self.tmp[parent] = pnode
+            # if parent == 0:
+            #     self.head.children.append(new_node)
+            # else:
+            #     try:
+            #         pnode = self.idx_to_node[parent][1]
+            #         pnode.children.append(new_node)
+            #     except:
+            #         pnode = Node(parent)
+            #         self.tmp[parent] = pnode
+            #         pnode.children.append(new_node)
+            pnode.children.append(new_node)
             self.idx_to_node[cur+1] = [parent, new_node]
 
 def convert_status(tree, node):
@@ -97,8 +105,6 @@ def search(tree, node):
 
     while dq:
         cnode, depth = dq.popleft()
-        if len(cnode.children) == 0:
-            continue
         for nnode in cnode.children:
             v = nnode.value
             if not tree.status[v]:
