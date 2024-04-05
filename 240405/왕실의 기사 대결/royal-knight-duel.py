@@ -106,13 +106,10 @@ if __name__ == '__main__':
         # remove_set에 있으면 0처리
         new_pos = [[0]*L for _ in range(L)]
         for i, j in visit_dq:
-            if (i, j) in visit_dq:
-                if pos[i][j] in remove_set:
-                    continue
-                nx, ny = i+dx, j+dy
-                new_pos[nx][ny] = pos[i][j]
-            else:
-                new_pos[i][j] = pos[i][j]
+            if pos[i][j] in remove_set:
+                continue
+            nx, ny = i+dx, j+dy
+            new_pos[nx][ny] = pos[i][j]
 
         for k, (x1, y1, x2, y2) in cur_pos.items():
             if k in knights:
