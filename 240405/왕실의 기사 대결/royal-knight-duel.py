@@ -10,7 +10,7 @@ LxL 체스판에서 대결 준비
 (2). 데미지
 - 명령 받은 기사가 밀치면 밀려난 기사는 피해를 입게 됨.
 - w*h 직사각형 내에 놓여있는 함정의 수 만큼만 피해를 입음
-- 체력이상으로 데이미지를 받을 경우 체스판에서 사라짐
+- 체력이상으로 데미지를 받을 경우 체스판에서 사라짐
 - 명령 받은 기사는 피해를 입지 않음
 - 모두 밀리고나서 대미지를 입게 됨.
 
@@ -42,10 +42,15 @@ def find_group(pos, cur_pos, pid, nd, direc):
             if nx < 0 or nx >= length or ny < 0 or ny >= length or pos[nx][ny] == 0:
                 continue
             if (nx, ny) not in visit:
-                if pos[nx][ny] in knight or i == nd:
+                if pos[nx][ny] in knight:
                     visit.add((nx, ny))
-                    knight.add(pos[nx][ny])
                     dq.append((nx, ny))
+                else:
+                    ddx, ddy = direc[nd]
+                    if (nx-ddx, ny-ddy) in visit:
+                        knight.add(pos[nx][ny])
+                        visit.add((nx, ny))
+                        dq.append((nx, ny))
     return visit, knight
 
 if __name__ == '__main__':
@@ -69,11 +74,9 @@ if __name__ == '__main__':
     for pid, nd in cmds:
         if cur_hp[pid] == 0:
             continue
-        
-        # find_group
-        visit, knights = find_group(pos, cur_pos, pid, nd, direc)
 
-        # move (cascade)
+        # find_group / move (cascade)
+        visit, knights = find_group(pos, cur_pos, pid, nd, direc)
         move_flag = True
         damage = [0]*(N+1)
 
@@ -102,11 +105,21 @@ if __name__ == '__main__':
         # 이동할건데 
         # remove_set에 있으면 0처리
         new_pos = [[0]*L for _ in range(L)]
-        for x, y in visit_dq:
-            if pos[x][y] in remove_set:
+        for i, j in visit_dq:
+            if (i, j) in visit_dq:
+                if pos[i][j] in remove_set:
+                    continue
+                nx, ny = i+dx, j+dy
+                new_pos[nx][ny] = pos[i][j]
+            else:
+                new_pos[i][j] = pos[i][j]
+
+        for k, (x1, y1, x2, y2) in cur_pos.items():
+            if k in knights:
                 continue
-            nx, ny = x+dx, y+dy
-            new_pos[nx][ny] = pos[x][y]
+            for i in range(x1, x2):
+                for j in range(y1, y2):
+                    new_pos[i][j] = k
         pos = new_pos
 
         # 시작 좌표 갱신
