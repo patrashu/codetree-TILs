@@ -75,6 +75,11 @@ if __name__ == '__main__':
         if cur_hp[pid] == 0:
             continue
 
+        # print(cur_hp)
+        # for cc in pos:
+        #     print(cc)
+        # print()
+
         # find_group / move (cascade)
         visit, knights = find_group(pos, cur_pos, pid, nd, direc)
         move_flag = True
@@ -91,6 +96,8 @@ if __name__ == '__main__':
                 if pos[cx][cy] != pid:
                     damage[pos[cx][cy]] += 1
         
+        # print(damage)
+        # print(visit_dq)
         if not move_flag:
             continue
 
@@ -112,7 +119,7 @@ if __name__ == '__main__':
             new_pos[nx][ny] = pos[i][j]
 
         for k, (x1, y1, x2, y2) in cur_pos.items():
-            if k in knights:
+            if k in knights or cur_hp[k] == 0:
                 continue
             for i in range(x1, x2):
                 for j in range(y1, y2):
