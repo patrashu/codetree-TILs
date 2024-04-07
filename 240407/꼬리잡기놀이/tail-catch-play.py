@@ -34,9 +34,9 @@ if __name__ == '__main__':
                 _, nx, ny, cd = candits[0]
                 if arr[cx][cy] == 1:
                     if cd in [0, 3]:
-                        nd = -1
-                    else:
                         nd = 1
+                    else:
+                        nd = -1
                 
                 visited[nx][ny] = True
                 dq.append((nx, ny))
@@ -56,6 +56,10 @@ if __name__ == '__main__':
         shoots.append((N-i-1, N-1, 3))
     for i in range(N):
         shoots.append((0, N-i-1, 2))
+
+    # for (cx, cy), (ways, cnt, nd) in groups.items():
+    #     print(ways)
+    #     print(nd)
 
     ans = 0
     for time in range(K):
