@@ -34,9 +34,9 @@ if __name__ == '__main__':
                 _, nx, ny, cd = candits[0]
                 if arr[cx][cy] == 1:
                     if cd in [0, 3]:
-                        nd = 1
-                    else:
                         nd = -1
+                    else:
+                        nd = 1
                 
                 visited[nx][ny] = True
                 dq.append((nx, ny))
