@@ -44,7 +44,7 @@ if __name__ == '__main__':
                 ways.append((nx, ny))
 
             cnt = len(list(filter(lambda x: x<4, group)))
-            groups[(cx, cy)] = [ways, cnt, nd]
+            groups[(i, j)] = [ways, cnt, nd]
 
     # shoot candits 
     shoots = []
@@ -53,9 +53,9 @@ if __name__ == '__main__':
     for i in range(N):
         shoots.append((N-1, i, 0))
     for i in range(N):
-        shoots.append((N-i, N-1, 3))
+        shoots.append((N-i-1, N-1, 3))
     for i in range(N):
-        shoots.append((0, N-i, 2))
+        shoots.append((0, N-i-1, 2))
 
     ans = 0
     for time in range(K):
