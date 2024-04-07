@@ -33,7 +33,7 @@ if __name__ == '__main__':
                 candits.sort(key=lambda x: x[0])
                 _, nx, ny, cd = candits[0]
                 if arr[cx][cy] == 1:
-                    if cd in [2, 3]:
+                    if cd in [1, 3]:
                         nd = 1
                     else:
                         nd = -1
