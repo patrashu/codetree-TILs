@@ -15,6 +15,7 @@ if __name__ == '__main__':
             dq, group = deque([(i, j)]), [1]
             nd, ways = 0, deque([(i, j)])
             visited[i][j] = True
+            direction = []
             
             while dq:
                 cx, cy = dq.popleft()
@@ -32,18 +33,24 @@ if __name__ == '__main__':
                 # 맨 처음일 경우  방향 select
                 candits.sort(key=lambda x: x[0])
                 _, nx, ny, cd = candits[0]
-                if arr[cx][cy] == 1:
-                    if cd in [1, 3]:
-                        nd = 1
-                    else:
-                        nd = -1
-                
+                direction.append(cd)
                 visited[nx][ny] = True
                 dq.append((nx, ny))
                 group.append(arr[nx][ny])
                 ways.append((nx, ny))
 
             cnt = len(list(filter(lambda x: x<4, group)))
+            # check (중복 제거)
+            tmp, origin, flag = [], [3, 2, 1, 0], False
+            for pp in range(len(direction)):
+                if direction[(pp)%len(direction)] == direction[(pp+1)%len(direction)]:
+                    continue
+                tmp.append(direction[pp])
+
+            for pp in range(len(tmp)-4):
+                if origin == tmp[pp:pp+4]:
+                    flag = True
+            nd = -1 if flag else 1
             groups[(i, j)] = [ways, cnt, nd]
 
     # shoot candits 
