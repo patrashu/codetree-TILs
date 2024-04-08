@@ -1,159 +1,124 @@
-n, m, k, c = tuple(map(int, input().split()))
-tree = [[0] * (n + 1)]
-for _ in range(n):
-    tree.append([0] + list(map(int, input().split())))
+"""
+NxN 격자에 나무 있음
+제초제를 뿌려 성장을 억제하고자 한다
+제초제는 K 범위만큼 대각선으로 퍼진다 (벽은 전파 x)
 
-add_tree = [
-    [0] * (n + 1)
-    for _ in range(n + 1)
-]
-herb = [
-    [0] * (n + 1)
-    for _ in range(n + 1)
-]
+(1). 나무 성장 (o)
+- 인접한 칸 중 나무가 있는 칸만큼 성장
+- 성장은 동시에 일어남
 
-ans = 0
+(2). 번식 진행 (o)
+- 인접한 4칸 중 다른 나무나 제초제가 모두 없는 칸에 번식을 진행
+- 41일때 번식 가능한 칸이 두개면 각 칸에 20씩 들어감
+- 번식은 동시에 일어남
 
+(3). 제초제 뿌림
+- 제추제를 뿌렸을 때 나무가 가장 많이 박멸되는 칸에 제초제를 뿌림
+- 나무 없는 칸에 제초제 뿌리면 나무가 없는 상태로 끝남
+- 나무 있는 칸에 제초제 뿌리면 4개의 대각선 방향으로 K만큼 전파 됨.
+- 중간에 벽이거나 나무가 없으면 그 칸까지는 뿌림
+- c년만큼 제초제가 남아있다가 c+1이 될 때 사라지게 됨.
+- 제초제 있는데 또 뿌리면 c로 초기화
 
-def is_out_range(x, y):
-    return not (1 <= x and x <= n and 1 <= y and y <= n)
+벽: -1이거나 out of bound일 경우
+나무 matrix 하나랑, 제초제 matrix 하나?
+"""
+from collections import defaultdict
 
+def growth(arr, N, direc):
+    g_mat = [[0]*N for _ in range(N)]
+    for i in range(N):
+        for j in range(N):
+            if arr[i][j] <= 0: # not tree
+                continue
+            
+            for k in range(0, 8, 2):
+                nx, ny = i+direc[k][0], j+direc[k][1]
+                if nx < 0 or nx >= N or ny < 0 or ny >= N or arr[nx][ny] <= 0:
+                    continue
+                g_mat[i][j] += 1
 
-# 1단계 : 인접한 네 개의 칸 중 나무가 있는 칸의 수만큼 나무가 성장합니다.
-def step_one():
-    dxs, dys = [-1, 0, 1, 0], [0, -1, 0, 1]
+    for i in range(N):
+        for j in range(N):
+            arr[i][j] += g_mat[i][j]
 
-    for i in range(1, n + 1):
-        for j in range(1, n + 1):
-            if tree[i][j] <= 0: 
+def seed(arr, med, N, direc):
+    s_mat = [[0]*N for _ in range(N)]
+
+    for i in range(N):
+        for j in range(N):
+            if arr[i][j] <= 0:
+                continue
+            candits = []
+            for k in range(0, 8, 2):
+                nx, ny = i+direc[k][0], j+direc[k][1]
+                if nx < 0 or nx >= N or ny < 0 or ny >= N or arr[nx][ny] == -1: # if wall
+                    continue
+
+                if arr[nx][ny] == 0 and med[nx][ny] == 0:
+                    candits.append((nx, ny))
+            
+            for tx, ty in candits:
+                s_mat[tx][ty] += arr[i][j] // len(candits)
+
+    for i in range(N):
+        for j in range(N):
+            arr[i][j] += s_mat[i][j]
+
+def remove(arr, med, N, direc, K, C):
+    ans = defaultdict(list)
+
+    for i in range(N):
+        for j in range(N):
+            if arr[i][j] <= 0:
                 continue
 
-            # 나무가 있는 칸의 수(cnt)만큼 나무가 성장합니다.
-            cnt = 0
-            for dx, dy in zip(dxs, dys):
-                nx, ny = i + dx, j + dy
-                if is_out_range(nx, ny): 
-                    continue
-                if tree[nx][ny] > 0: 
-                    cnt += 1
+            cnt, candits = arr[i][j], [(i, j)]
+            for k in range(1, 8, 2):
+                nx, ny, dx, dy = i, j, *direc[k]
+                time = 0
 
-            tree[i][j] += cnt
-
-
-# 2단계 : 기존에 있었던 나무들은 아무것도 없는 칸에 번식을 진행합니다.
-def step_two():
-    dxs, dys = [-1, 0, 1, 0], [0, -1, 0, 1]
-
-    # 모든 나무에서 동시에 일어나는 것을 구현하기 위해 하나의 배열을 더 이용합니다.
-    # add_tree를 초기화해줍니다.
-    for i in range(1, n + 1):
-        for j in range(1, n + 1): 
-            add_tree[i][j] = 0
-
-    for i in range(1, n + 1):
-        for j in range(1, n + 1):
-            if tree[i][j] <= 0: 
-                continue
-
-            # 해당 나무와 인접한 나무 중 아무도 없는 칸의 개수를 찾습니다.
-            cnt = 0
-            for dx, dy in zip(dxs, dys):
-                nx, ny = i + dx, j + dy
-                if is_out_range(nx, ny): 
-                    continue
-                if herb[nx][ny]: 
-                    continue
-                if tree[nx][ny] == 0: 
-                    cnt += 1
-
-            # 인접한 나무 중 아무도 없는 칸은 cnt로 나눠준 만큼 번식합니다.
-            for dx, dy in zip(dxs, dys):
-                nx, ny = i + dx, j + dy
-                if is_out_range(nx, ny): 
-                    continue
-                if herb[nx][ny]: 
-                    continue
-                if tree[nx][ny] == 0: 
-                    add_tree[nx][ny] += tree[i][j] // cnt
-    
-    # add_tree를 더해 번식을 동시에 진행시킵니다.
-    for i in range(1, n + 1):
-        for j in range(1, n + 1):
-            tree[i][j] += add_tree[i][j]
-
-
-# 3단계 : 가장 많이 박멸되는 칸에 제초제를 뿌립니다.
-def step_three():
-    global ans
-
-    dxs, dys = [-1, 1, 1, -1], [-1, -1, 1, 1]
-
-    max_del, max_x, max_y = 0, 1, 1
-    for i in range(1, n + 1):
-        for j in range(1, n + 1):
-            # 모든 칸에 대해 제초제를 뿌려봅니다. 각 칸에서 제초제를 뿌릴 시 박멸되는 나무의 그루 수를 계산하고,
-            # 이 값이 최대가 되는 지점을 찾아줍니다.
-            if tree[i][j] <= 0: 
-                continue
-
-            cnt = tree[i][j]
-            for dx, dy in zip(dxs, dys):
-                nx, ny = i, j
-                for _ in range(k):
-                    nx, ny = nx + dx, ny + dy
-                    if is_out_range(nx, ny): 
+                while time < K:
+                    nx, ny = nx+dx, ny+dy
+                    if nx < 0 or nx >= N or ny < 0 or ny >= N:
                         break
-                    if tree[nx][ny] <= 0: 
+                    candits.append((nx, ny))
+                    if arr[nx][ny] <= 0:
                         break
-                    cnt += tree[nx][ny]
+                    cnt += arr[nx][ny]
+                    time += 1
 
-            if max_del < cnt:
-                max_del = cnt
-                max_x = i
-                max_y = j
+            ans[cnt].append((i, j, candits))
 
-    ans += max_del
+    if len(ans) == 0:
+        return 0
+        
+    cnt, r_mat = sorted(ans.items(), key=lambda x: (-x[0]))[0]
+    r_mat.sort(key=lambda x: (x[0], x[1]))
+    for tx, ty in r_mat[0][2]:
+        med[tx][ty] = C+1
+        if arr[tx][ty] > 0:
+            arr[tx][ty] = 0
+    return cnt
 
-    # 찾은 칸에 제초제를 뿌립니다.
-    if tree[max_x][max_y] > 0:
-        tree[max_x][max_y] = 0
-        herb[max_x][max_y] = c
+def release(med, N):
+    for i in range(N):
+        for j in range(N):
+            if med[i][j] == 0:
+                continue
+            med[i][j] -= 1
 
-        for dx, dy in zip(dxs, dys):
-            nx, ny = max_x, max_y
-            for _ in range(k):
-                nx, ny = nx + dx, ny + dy
-                if is_out_range(nx, ny): 
-                    break
-                if tree[nx][ny] < 0: 
-                    break
-                if tree[nx][ny] == 0:
-                    herb[nx][ny] = c
-                    break
+if __name__ == '__main__':
+    N, M, K, C = map(int, input().split())
+    arr = [list(map(int, input().split())) for _ in range(N)]
+    med = [[0]*N for _ in range(N)]
+    direc = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
 
-                tree[nx][ny] = 0
-                herb[nx][ny] = c
+    res = 0
+    for _ in range(M):
+        growth(arr, N, direc)
+        seed(arr, med, N, direc)
+        res += remove(arr, med, N, direc, K, C)
+        release(med, N)
 
-
-# 제초제의 기간을 1년 감소시킵니다.
-def delete_herb():
-    for i in range(1, n + 1):
-        for j in range(1, n + 1): 
-            if herb[i][j] > 0: 
-                herb[i][j] -= 1
-
-
-for _ in range(m):
-    # 1단계 : 인접한 네 개의 칸 중 나무가 있는 칸의 수만큼 나무가 성장합니다.
-    step_one()
-
-    # 2단계 : 기존에 있었던 나무들은 아무것도 없는 칸에 번식을 진행합니다.
-    step_two()
-
-    # 제초제의 기간을 1년 감소시킵니다.
-    delete_herb()
-
-    # 3단계 : 가장 많이 박멸되는 칸에 제초제를 뿌립니다.
-    step_three()
-
-print(ans)
+    print(res)
