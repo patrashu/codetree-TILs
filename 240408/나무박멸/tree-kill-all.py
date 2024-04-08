@@ -90,6 +90,9 @@ def remove(arr, med, N, direc, K, C):
 
             ans[cnt].append((i, j, candits))
 
+    if len(ans) == 0:
+        return 0
+        
     cnt, r_mat = sorted(ans.items(), key=lambda x: (-x[0]))[0]
     r_mat.sort(key=lambda x: (x[0], x[1]))
     for tx, ty in r_mat[0][2]:
