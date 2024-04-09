@@ -71,7 +71,7 @@ if __name__ == '__main__':
         # packman move
         max_cnt, max_move = -1, []
         dq = deque([(px, py, 0, 0, [])]) # cx, cy, cnt, depth, move
-
+        
         while dq:
             cx, cy, cnt, depth, move = dq.popleft()
             if depth == 3:
@@ -85,6 +85,8 @@ if __name__ == '__main__':
                     continue
                 if (nx, ny) not in move:
                     dq.append((nx, ny, cnt+len(next_monster[(nx, ny)]), depth+1, move+[(nx, ny)]))
+                else:
+                    dq.append((nx, ny, cnt, depth+1, move+[(nx, ny)]))
 
         # eat
         for nx, ny in max_move:
@@ -96,7 +98,7 @@ if __name__ == '__main__':
         # death - 1
         for i in range(4):
             for j in range(4):
-                if not death[i][j]:
+                if death[i][j] == 0:
                     continue
                 death[i][j] -= 1
 
