@@ -54,15 +54,19 @@ if __name__ == '__main__':
         next_monster = defaultdict(list)
         for (cx, cy), values in monster.items():
             for cd in values:
-                nx, ny, nd = None, None, None
+                nx, ny, nd, flag = None, None, None, False
                 for i in range(8):
                     nd = (cd+i)%8
                     dx, dy = direc[nd]
                     nx, ny = cx+dx, cy+dy
                     if nx < 0 or nx >= 4 or ny < 0 or ny >= 4 or death[nx][ny] or (px, py) == (nx, ny):
                         continue
+                    flag = True
                     break
-                next_monster[(nx, ny)].append(nd)
+                if flag:
+                    next_monster[(nx, ny)].append(nd)
+                else:
+                    next_monster[(cx, cy)].append(cd)
 
         # packman move
         max_cnt, max_move = -1, []
@@ -100,7 +104,7 @@ if __name__ == '__main__':
         for key, values in copy_monster.items():
             next_monster[key].extend(values)
         monster = next_monster
-    
+
     res = 0
     for k, v in monster.items():
         res += len(v)
