@@ -76,6 +76,12 @@ if __name__ == '__main__':
                             tg, arr[(ntx, nty)][-1] = arr[(ntx, nty)][-1], tg
                             arr[(ntx, nty)].sort() 
                         players[pid] = [ntx, nty, td, ts, tg]
+                    
+                    tx, ty, td, ts, tg = nx, ny, ccd, ccp, ccg
+                    if arr[(ntx, nty)][-1] > tg:
+                        tg, arr[(ntx, nty)][-1] = arr[(ntx, nty)][-1], tg
+                        arr[(ntx, nty)].sort() 
+                    players[pid2] = [tx, ty, td, ts, tg]
                 
                 # pid1이 nx, ny로, pid2는 따로
                 else:  
@@ -109,5 +115,5 @@ if __name__ == '__main__':
                         tg, arr[(tx, ty)][-1] = arr[(tx, ty)][-1], tg
                         arr[(tx, ty)].sort() 
                     players[pid] = [tx, ty, td, ts, tg]
-        
+
     print(*scores)
