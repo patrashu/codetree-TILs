@@ -66,19 +66,16 @@ def convert_front_box(belts, idx_to_belt, line):
         p2 = belts[recv].popleft()
     except:
         pass
-
     if p1 is not None and p2 is not None:
         idx_to_belt[p1], idx_to_belt[p2] = recv, send
         belts[send].appendleft(p2)
         belts[recv].appendleft(p1)
-    elif p1 is None:
+    elif p1 is None and p2 is not None:
         idx_to_belt[p2] = send
         belts[send].appendleft(p2)
-    elif p2 is None:
+    elif p2 is None and p1 is not None:
         idx_to_belt[p1] = recv
-        belts[recv].appendleft(p1)
-    else:
-        pass
+        belts[recv].appendleft(p1)        
     return len(belts[recv])
 
 def send_half_len_boxes(belts, idx_to_belt, line):
@@ -105,19 +102,21 @@ def get_box_info(belts, bpid, line):
         a = belts[bpid][idx-1]
     if idx+1 < len(belts[bpid]):
         b = belts[bpid][idx+1]
-    return a+2*b
+    try:
+        return a+2*b
+    except:
+        print(a, b)
+        print(belts[bpid])
 
 def get_conveyor_info(belts, line):
-    a, b, c = None, None, len(belts[line[0]])
+    a, b, c = -1, -1, len(belts[line[0]]) 
+    if c > 0:
+        a, b = belts[line[0]][0], belts[line[0]][-1]
     try:
-        a = belts[line[0]][0]
+        return a+2*b+3*c
     except:
-        a = -1
-    try:
-        b = belts[line[0]][-1]
-    except:
-        b = -1
-    return a+2*b+3*c
+        print(a, b, c)
+        print(belts[line[0]])
 
 if __name__ == '__main__':
     belts, idx_to_belt = None, None
@@ -127,11 +126,16 @@ if __name__ == '__main__':
             belts, idx_to_belt = start(line)
         elif cmd == 200:
             print(send_all_boxes(belts, idx_to_belt, line))
+            # send_all_boxes(belts, idx_to_belt, line)
         elif cmd == 300:
             print(convert_front_box(belts, idx_to_belt, line))
+            # convert_front_box(belts, idx_to_belt, line)
         elif cmd == 400:
             print(send_half_len_boxes(belts, idx_to_belt, line))
+            # send_half_len_boxes(belts, idx_to_belt, line)
         elif cmd == 500:
             print(get_box_info(belts, idx_to_belt[line[0]], line))
+            # get_box_info(belts, idx_to_belt[line[0]], line)
         else:
             print(get_conveyor_info(belts, line))
+            # get_conveyor_info(belts, line)
