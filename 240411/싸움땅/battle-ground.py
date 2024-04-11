@@ -103,9 +103,9 @@ if __name__ == '__main__':
                             arr[(ntx, nty)].sort() 
                         players[pid2] = [ntx, nty, td, ts, tg]
                     
-                    tx, ty, td, ts, tg = nx, ny, nd, cp, 0
+                    tx, ty, td, ts, tg = nx, ny, nd, cp, cg
                     pos_to_player[(tx, ty)] = pid
-                    if arr[(tx, ty)][-1] > cg:
+                    if arr[(tx, ty)][-1] > tg:
                         tg, arr[(tx, ty)][-1] = arr[(tx, ty)][-1], tg
                         arr[(tx, ty)].sort() 
                     players[pid] = [tx, ty, td, ts, tg]
