@@ -32,7 +32,7 @@ M = 박스 수
 from collections import deque, defaultdict
 
 def start(line):
-    belts = defaultdict(deque)
+    belts = defaultdict(list)
     idx_to_belt = {}
     for idx in range(line[1]):
         belts[line[2+idx]].append(idx+1)
@@ -45,54 +45,46 @@ def send_all_boxes(belts, idx_to_belt, line):
     if length == 0:
         return len(belts[recv])
 
-    all_boxes = deque()
-    for idx in range(length):
-        all_boxes.appendleft(belts[send].popleft())
+    for box in belts[send]:
+        idx_to_belt[box] = recv
 
-    while all_boxes:
-        tmp = all_boxes.popleft()
-        idx_to_belt[tmp] = recv
-        belts[recv].appendleft(tmp)   
+    belts[recv] = belts[send] + belts[recv]
+    belts[send].clear()
     return len(belts[recv])
 
 def convert_front_box(belts, idx_to_belt, line):
     send, recv = line
     p1, p2 = None, None
-    try:
-        p1 = belts[send].popleft()
+    try: 
+        p1 = belts[send][0]
     except:
         pass
     try:
-        p2 = belts[recv].popleft()
+        p2 = belts[recv][0]
     except:
         pass
     if p1 is not None and p2 is not None:
         idx_to_belt[p1], idx_to_belt[p2] = recv, send
-        belts[send].appendleft(p2)
-        belts[recv].appendleft(p1)
+        belts[send][0], belts[recv][0] = p2, p1
     elif p1 is None and p2 is not None:
         idx_to_belt[p2] = send
-        belts[send].appendleft(p2)
+        belts[send].append(belts[recv].pop(0))
     elif p2 is None and p1 is not None:
         idx_to_belt[p1] = recv
-        belts[recv].appendleft(p1)        
+        belts[recv].append(belts[send].pop(0))        
     return len(belts[recv])
 
 def send_half_len_boxes(belts, idx_to_belt, line):
     send, recv = line
     length = len(belts[send])
-
     if length == 0:
         return len(belts[recv])
 
-    half = deque()
     for idx in range(length//2):
-        half.appendleft(belts[send].popleft())
-    
-    for tmp in half:
-        idx_to_belt[tmp] = recv
-        belts[recv].appendleft(tmp)
+        idx_to_belt[belts[send][idx]] = recv
 
+    belts[recv] = belts[send][:length//2] + belts[recv]
+    belts[send] = belts[send][length//2:]
     return len(belts[recv])
 
 def get_box_info(belts, bpid, line):
@@ -102,21 +94,13 @@ def get_box_info(belts, bpid, line):
         a = belts[bpid][idx-1]
     if idx+1 < len(belts[bpid]):
         b = belts[bpid][idx+1]
-    try:
-        return a+2*b
-    except:
-        print(a, b)
-        print(belts[bpid])
+    return a+2*b
 
 def get_conveyor_info(belts, line):
     a, b, c = -1, -1, len(belts[line[0]]) 
     if c > 0:
         a, b = belts[line[0]][0], belts[line[0]][-1]
-    try:
-        return a+2*b+3*c
-    except:
-        print(a, b, c)
-        print(belts[line[0]])
+    return a+2*b+3*c
 
 if __name__ == '__main__':
     belts, idx_to_belt = None, None
@@ -126,16 +110,11 @@ if __name__ == '__main__':
             belts, idx_to_belt = start(line)
         elif cmd == 200:
             print(send_all_boxes(belts, idx_to_belt, line))
-            # send_all_boxes(belts, idx_to_belt, line)
         elif cmd == 300:
             print(convert_front_box(belts, idx_to_belt, line))
-            # convert_front_box(belts, idx_to_belt, line)
         elif cmd == 400:
             print(send_half_len_boxes(belts, idx_to_belt, line))
-            # send_half_len_boxes(belts, idx_to_belt, line)
         elif cmd == 500:
             print(get_box_info(belts, idx_to_belt[line[0]], line))
-            # get_box_info(belts, idx_to_belt[line[0]], line)
         else:
             print(get_conveyor_info(belts, line))
-            # get_conveyor_info(belts, line)
