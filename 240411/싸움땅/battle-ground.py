@@ -53,6 +53,7 @@ if __name__ == '__main__':
                 # pid1이 이긴다 => 기존에 pid2도 이동해야 한다
                 # pid2가 이긴다 => 그대로 총버리고 앞으로 한칸 이동한다
                 if win_flag is False:
+                    del pos_to_player[(cx, cy)]
                     scores[pid2] += (ccp+ccg-cp-cg)
                     tx, ty, td, ts, tg = nx, ny, nd, cp, 0
                     arr[(tx, ty)].append(cg)
@@ -60,32 +61,28 @@ if __name__ == '__main__':
 
                     flag = False
                     for k in range(4):
-                        td = (td+k)%4
-                        ntx, nty = tx+direc[td][0], ty+direc[td][1]
-                        if ntx < 0 or ntx >= N or nty < 0 or nty >= N:
+                        ntd = (td+k)%4
+                        ntx, nty = tx+direc[ntd][0], ty+direc[ntd][1]
+                        if ntx < 0 or ntx >= N or nty < 0 or nty >= N or pos_to_player.get((ntx, nty), -1) != -1:
                             continue
-                        if pos_to_player.get((ntx, nty), -1) != -1:
-                            continue
-                        flag = True
                         break
 
-                    if flag:
-                        del pos_to_player[(cx, cy)]
-                        pos_to_player[(ntx, nty)] = pid
-                        if arr[(ntx, nty)][-1] > tg:
-                            tg, arr[(ntx, nty)][-1] = arr[(ntx, nty)][-1], tg
-                            arr[(ntx, nty)].sort() 
-                        players[pid] = [ntx, nty, td, ts, tg]
+                    pos_to_player[(ntx, nty)] = pid
+                    if arr[(ntx, nty)][-1] > tg:
+                        tg, arr[(ntx, nty)][-1] = arr[(ntx, nty)][-1], tg
+                        arr[(ntx, nty)].sort() 
+                    players[pid] = [ntx, nty, ntd, ts, tg]
                     
                     tx, ty, td, ts, tg = nx, ny, ccd, ccp, ccg
                     if arr[(tx, ty)][-1] > tg:
                         tg, arr[(tx, ty)][-1] = arr[(tx, ty)][-1], tg
-                        arr[(tx, ty)].sort() 
-                    players[pid2] = [tx, ty, td, ts, tg]
+                        arr[(tx, ty)].sort()
+                        players[pid2][4] = tg
                 
                 # pid1이 nx, ny로, pid2는 따로
                 else:  
                     del pos_to_player[(cx, cy)]
+                    del pos_to_player[(nx, ny)]
                     scores[pid] += (cp+cg-ccp-ccg)
                     tx, ty, td, ts, tg = nx, ny, ccd, ccp, 0
                     arr[(tx, ty)].append(ccg)
@@ -93,21 +90,17 @@ if __name__ == '__main__':
                     flag = False
 
                     for k in range(4):
-                        td = (td+k)%4
-                        ntx, nty = tx+direc[td][0], ty+direc[td][1]
-                        if ntx < 0 or ntx >= N or nty < 0 or nty >= N:
+                        ntd = (td+k)%4
+                        ntx, nty = tx+direc[ntd][0], ty+direc[ntd][1]
+                        if ntx < 0 or ntx >= N or nty < 0 or nty >= N or pos_to_player.get((ntx, nty), -1) != -1:
                             continue
-                        if pos_to_player.get((ntx, nty), -1) == -1:        
-                            flag = True
-                            break
+                        break
 
-                    if flag:
-                        del pos_to_player[(nx, ny)]
-                        pos_to_player[(ntx, nty)] = pid2
-                        if arr[(ntx, nty)][-1] > tg:
-                            tg, arr[(ntx, nty)][-1] = arr[(ntx, nty)][-1], tg
-                            arr[(ntx, nty)].sort() 
-                        players[pid2] = [ntx, nty, td, ts, tg]
+                    pos_to_player[(ntx, nty)] = pid2
+                    if arr[(ntx, nty)][-1] > tg:
+                        tg, arr[(ntx, nty)][-1] = arr[(ntx, nty)][-1], tg
+                        arr[(ntx, nty)].sort() 
+                    players[pid2] = [ntx, nty, ntd, ts, tg]
                     
                     tx, ty, td, ts, tg = nx, ny, nd, cp, cg
                     pos_to_player[(tx, ty)] = pid
