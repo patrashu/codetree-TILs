@@ -28,8 +28,8 @@ if __name__ == '__main__':
 
             # check players
             if pos_to_player.get((nx, ny), -1) == -1:
-                pos_to_player[(nx, ny)] = pid
                 del pos_to_player[(cx, cy)]
+                pos_to_player[(nx, ny)] = pid
                 if arr[(nx, ny)][-1] > cg:
                     cg, arr[(nx, ny)][-1] = arr[(nx, ny)][-1], cg
                     arr[(nx, ny)].sort() 
@@ -70,8 +70,8 @@ if __name__ == '__main__':
                         break
 
                     if flag:
-                        pos_to_player[(ntx, nty)] = pid
                         del pos_to_player[(cx, cy)]
+                        pos_to_player[(ntx, nty)] = pid
                         if arr[(ntx, nty)][-1] > tg:
                             tg, arr[(ntx, nty)][-1] = arr[(ntx, nty)][-1], tg
                             arr[(ntx, nty)].sort() 
@@ -102,8 +102,8 @@ if __name__ == '__main__':
                             break
 
                     if flag:
-                        pos_to_player[(ntx, nty)] = pid2
                         del pos_to_player[(nx, ny)]
+                        pos_to_player[(ntx, nty)] = pid2
                         if arr[(ntx, nty)][-1] > tg:
                             tg, arr[(ntx, nty)][-1] = arr[(ntx, nty)][-1], tg
                             arr[(ntx, nty)].sort() 
