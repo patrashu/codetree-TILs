@@ -119,7 +119,8 @@ if __name__ == '__main__':
                 rx, ry = oy, grid-ox-1
                 bef_to_cur[(rx+p, ry+q)] = [i, j]
         new_arr = deepcopy(arr)
-
+        
+        visit = [False]*M
         for (tx, ty), (cx, cy) in bef_to_cur.items():
             new_arr[tx][ty] = arr[cx][cy]
             if new_arr[tx][ty] == -11:
@@ -127,9 +128,6 @@ if __name__ == '__main__':
                 px, py = tx, ty
             elif new_arr[tx][ty] > 0:
                 new_arr[tx][ty] -= 1
-        
-        visit = [False]*M
-        for (tx, ty), (cx, cy) in bef_to_cur.items():
             for _pid in player_pos:
                 ccx, ccy = pid_to_player[_pid]
                 if not visit[_pid] and (ccx, ccy) == (cx, cy):
