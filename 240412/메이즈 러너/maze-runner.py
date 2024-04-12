@@ -64,7 +64,6 @@ if __name__ == '__main__':
             # update
             candits.sort(key=lambda x: (x[1], x[0]))
             _, _, nx, ny = candits[0]
-            print(pid, cx, cy, nx, ny)
             if (px, py) == (nx, ny):
                 exit_pid.append(pid)
 
@@ -110,7 +109,6 @@ if __name__ == '__main__':
         ans.sort(key=lambda x: (x[2], x[0], x[1]))
         # rotate and update
         p, q, grid, exit_pos, player_pos = ans[0]
-        print(p, q, grid, exit_pos, player_pos)
         for tx, ty in exit_pos:
             arr[tx][ty] = -11
 
