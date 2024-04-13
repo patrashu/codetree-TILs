@@ -47,8 +47,6 @@ M턴 동안
 """
 
 
-
-
 if __name__ == '__main__':
     N, M, P, C, D = map(int, input().split())
     rx, ry = map(int, input().split())
@@ -144,7 +142,7 @@ if __name__ == '__main__':
                 pos_to_pid[(tx, ty)] = i
 
             else:
-                score[pid] += D # 점수 추가
+                score[i] += D # 점수 추가
                 c_q = []
                 tmp = D
                 tpid = pos_to_pid[(cx, cy)]
@@ -155,10 +153,10 @@ if __name__ == '__main__':
                 while True:
                     ntx, nty = tx-direc[td][0]*tmp, ty-direc[td][1]*tmp
                     if ntx < 0 or ntx >= N or nty < 0 or nty >= N:
-                        c_q.append([tpid, tx, ty, False]) # pid, px, py, status
+                        c_q.append([tpid, tx, ty, ntx, nty, False]) # pid, px, py, status
                         break
                     else:
-                        c_q.append([tpid, ntx, nty, True])
+                        c_q.append([tpid, tx, ty, ntx, nty, True])
                         flag = pos_to_pid.get((ntx, nty), -1)
                         if flag == -1: # finish cascade
                             break
@@ -167,18 +165,17 @@ if __name__ == '__main__':
                             tpid = pos_to_pid[(tx, ty)]
                             tmp = 1
 
-                for tpid, tx, ty, tflag in c_q[::-1]:
+                for tpid, tx, ty, ntx, nty, tflag in c_q[::-1]:
                     if not tflag:
                         status[tpid] = 2
                         del pos_to_pid[(tx, ty)]
                         cnt -= 1
                     else:
-                        if tpid == pid:
+                        if tpid == i:
                             status[tpid], stime[tpid] = 1, 2 # 기절 + time
-                        stx, sty = santa[tpid]
-                        santa[tpid][0], santa[tpid][1] = tx, ty
-                        del pos_to_pid[(stx, sty)]
-                        pos_to_pid[(tx, ty)] = tpid
+                        del pos_to_pid[(tx, ty)]
+                        santa[tpid] = [ntx, nty]
+                        pos_to_pid[(ntx, nty)] = tpid
 
         for i in range(P):
             if stime[i] > 0:
@@ -192,5 +189,5 @@ if __name__ == '__main__':
                 continue
             score[i] += 1
         time -= 1
-
+        
     print(*score)
