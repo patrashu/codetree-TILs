@@ -12,7 +12,7 @@ def roll_up(arr, N):
     # roll up
     while True:
         r, c = len(sub_arr), len(sub_arr[0])
-        if cur_idx+c < N:
+        if cur_idx+c <= N:
             sub_arr.append(arr[cur_idx:cur_idx+c])
             cur_idx += c
         if cur_idx+r < N:
