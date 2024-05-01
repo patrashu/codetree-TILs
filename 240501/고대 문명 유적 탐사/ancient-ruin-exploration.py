@@ -89,7 +89,7 @@ while time < k:
     paths, cx, cy, rot = candits[0]
     if len(paths) == 0:
         break
-        
+
     tmp += len(paths)
 
     # update
@@ -140,6 +140,6 @@ while time < k:
         for tx, ty in n_paths:
             field[tx][ty] = wall_nums.popleft()
 
-    print(tmp)          
+    print(tmp, end=" ")          
     tmp = 0
     time += 1
