@@ -16,12 +16,9 @@ def preprocess(cmds):
             graph[(u, v)] = w
     
     new_graph = defaultdict(list)
-    # self_node = dict()
     for (st, et), v in graph.items():
         new_graph[st].append((et, v))
-        # if st == et:
-        #     self_node[st] = v
-
+        
     # find min_dist from each node
     min_dist = [[INF]*n for _ in range(n)]
     for i in range(n):
@@ -37,12 +34,7 @@ def preprocess(cmds):
                 if ccost + ncost < min_dist[i][nnode]:
                     min_dist[i][nnode] = ccost+ncost
                     heapq.heappush(hq, (nnode, ncost+ccost))
-    
-        # check self node
-        # try:
-        #     min_dist[i][i] = self_node[i]
-        # except:
-        #     min_dist[i][i] = INF
+
     return min_dist
 
 def create_candits_from_cur_node(items, min_dist, cur_node):
@@ -64,18 +56,28 @@ def remove_item(items, cmds):
         pass
 
 def sell_optimal_item(items, candits):
-    npid = None
-    while candits:
-        cost, pid = heapq.heappop(candits)
-        if cost <= 0 and items.get(pid, -1) != -1:
-            npid = pid
-            break
-
-    if npid is None:
+    if not candits:
         return -1
+    cost, pid = heapq.heappop(candits)
+    if cost <= 0 and items.get(pid, -1) != -1:
+        del items[pid]
+        return pid
+    else:
+        heapq.heappush(candits, (cost, pid))
+        return -1
+
+
+    # while candits:
+    #     cost, pid = heapq.heappop(candits)
+    #     if cost <= 0 and items.get(pid, -1) != -1:
+    #         npid = pid
+    #         break
+
+    # if npid is None:
+    #     return -1
     
-    del items[npid]
-    return npid
+    # del items[npid]
+    # return npid
 
 if __name__ == '__main__':
     min_dist, items = None, dict()
