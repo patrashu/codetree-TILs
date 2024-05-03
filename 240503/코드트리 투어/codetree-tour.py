@@ -18,23 +18,23 @@ def preprocess(cmds):
     new_graph = defaultdict(list)
     for (st, et), v in graph.items():
         new_graph[st].append((et, v))
-    # find min_dist from each node
-    min_dist = [[INF]*n for _ in range(n)]
-    for i in range(n):
-        min_dist[i][i] = 0
-        hq = [(i, 0)]
+    return new_graph, n
+    
+def find_min_dist(new_graph, n, pnid):
+    dist = [INF]*n
+    dist[pnid] = 0
+    hq = [(pnid, 0)]
 
-        while hq:
-            cnode, ccost = heapq.heappop(hq)
-            if min_dist[i][cnode] < ccost:
-                continue
-            
-            for nnode, ncost in new_graph[cnode]:
-                if ccost + ncost < min_dist[i][nnode]:
-                    min_dist[i][nnode] = ccost+ncost
-                    heapq.heappush(hq, (nnode, ncost+ccost))
-
-    return min_dist
+    while hq:
+        cnode, ccost = heapq.heappop(hq)
+        if dist[cnode] < ccost:
+            continue
+    
+        for nnode, ncost in new_graph[cnode]:
+            if ccost + ncost < dist[nnode]:
+                dist[nnode] = ccost+ncost
+                heapq.heappush(hq, (nnode, ncost+ccost))
+    return dist
 
 def create_candits_from_cur_node(items, min_dist, cur_node):
     _hq = []
@@ -67,12 +67,13 @@ def sell_optimal_item(items, candits):
     return npid
 
 if __name__ == '__main__':
-    min_dist, items = None, dict()
-    cur_node, candits = 0, []
+    graph, min_dist, items = None, dict(), dict()
+    n, cur_node, candits = None, 0, []
     for time in range(int(input())):
         cmds = list(map(int, input().split()))
         if cmds[0] == 100:
-            min_dist = preprocess(cmds[1:])
+            graph, n = preprocess(cmds[1:])
+            min_dist[0] = find_min_dist(graph, n, 0)
             candits = create_candits_from_cur_node(items, min_dist, cur_node)
         elif cmds[0] == 200:
             create_item(items, cmds[1:])
@@ -84,4 +85,6 @@ if __name__ == '__main__':
             print(sell_optimal_item(items, candits))
         elif cmds[0] == 500:
             cur_node = cmds[1]
+            if min_dist.get(cur_node, -1) == -1:
+                min_dist[cur_node] = find_min_dist(graph, n, cur_node)
             candits = create_candits_from_cur_node(items, min_dist, cur_node)
