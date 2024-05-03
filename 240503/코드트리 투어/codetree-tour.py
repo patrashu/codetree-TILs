@@ -18,7 +18,6 @@ def preprocess(cmds):
     new_graph = defaultdict(list)
     for (st, et), v in graph.items():
         new_graph[st].append((et, v))
-        
     # find min_dist from each node
     min_dist = [[INF]*n for _ in range(n)]
     for i in range(n):
@@ -40,9 +39,7 @@ def preprocess(cmds):
 def create_candits_from_cur_node(items, min_dist, cur_node):
     _hq = []
     for pid, (rev, dst) in items.items():
-        if min_dist[cur_node][dst] == INF:
-            heapq.heappush(_hq, (INF, pid))
-        else:
+        if min_dist[cur_node][dst] != INF:
             heapq.heappush(_hq, (-(rev - min_dist[cur_node][dst]), pid))
     return _hq
 
@@ -56,28 +53,18 @@ def remove_item(items, cmds):
         pass
 
 def sell_optimal_item(items, candits):
-    if not candits:
+    npid = None
+    while candits:
+        cost, pid = heapq.heappop(candits)
+        if cost <= 0 and items.get(pid, -1) != -1:
+            npid = pid
+            break
+
+    if npid is None:
         return -1
-    cost, pid = heapq.heappop(candits)
-    if cost <= 0 and items.get(pid, -1) != -1:
-        del items[pid]
-        return pid
-    else:
-        heapq.heappush(candits, (cost, pid))
-        return -1
-
-
-    # while candits:
-    #     cost, pid = heapq.heappop(candits)
-    #     if cost <= 0 and items.get(pid, -1) != -1:
-    #         npid = pid
-    #         break
-
-    # if npid is None:
-    #     return -1
     
-    # del items[npid]
-    # return npid
+    del items[npid]
+    return npid
 
 if __name__ == '__main__':
     min_dist, items = None, dict()
@@ -89,9 +76,7 @@ if __name__ == '__main__':
             candits = create_candits_from_cur_node(items, min_dist, cur_node)
         elif cmds[0] == 200:
             create_item(items, cmds[1:])
-            if min_dist[cur_node][cmds[3]] == INF:
-                heapq.heappush(candits, (INF, cmds[1]))
-            else:
+            if min_dist[cur_node][cmds[3]] != INF:
                 heapq.heappush(candits, (-(cmds[2] - min_dist[cur_node][cmds[3]]), cmds[1]))
         elif cmds[0] == 300:
             remove_item(items, cmds[1:])
