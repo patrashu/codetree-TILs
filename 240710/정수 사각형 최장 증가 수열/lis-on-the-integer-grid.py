@@ -20,20 +20,18 @@ for i in range(n):
 
         # bfs
         dq = deque([(i, j)])
-        visit = set()
-        visit.add((i, j))
 
         while dq:
             cx, cy = dq.popleft()
             for dx, dy in direction:
                 nx, ny = cx+dx, cy+dy
-                if nx < 0 or nx >= n or ny < 0 or ny >= n or (nx, ny) in visit:
+                # 범위에 벗어날 때 
+                if nx < 0 or nx >= n or ny < 0 or ny >= n:
                     continue
 
                 # 값이 작으면서 경로를 갱신할 수 있을 때
-                if (arr[cx][cy] < arr[nx][ny]) and (dp[nx][ny] < dp[cx][cy] + 1):
+                if (arr[cx][cy] < arr[nx][ny]) and (dp[nx][ny] < dp[cx][cy]+1):
                     dp[nx][ny] = dp[cx][cy]+1
-                    visit.add((nx, ny))
                     dq.append((nx, ny))
 
 max_value = 0    
