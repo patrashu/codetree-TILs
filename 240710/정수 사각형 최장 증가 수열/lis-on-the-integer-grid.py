@@ -4,10 +4,14 @@ n = int(input())
 arr = [list(map(int, input().split())) for _ in range(n)]
 dp = [[1]*n for _ in range(n)]
 direction = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-
+max_value = 0
 
 for i in range(n):
     for j in range(n):
+        # 이미 갱신이 되어있다 => 탐색할필요가 없지않아?
+        if dp[i][j] > 1:
+            continue
+
         flag = False
         for dx, dy in direction:
             nx, ny = i+dx, j+dy
@@ -19,10 +23,11 @@ for i in range(n):
             continue
 
         # bfs
-        dq = deque([(i, j)])
+        dq = deque([(i, j, 1)])
 
         while dq:
-            cx, cy = dq.popleft()
+            cx, cy, value = dq.popleft()
+            max_value = max(max_value, value)
             for dx, dy in direction:
                 nx, ny = cx+dx, cy+dy
                 # 범위에 벗어날 때 
@@ -32,9 +37,6 @@ for i in range(n):
                 # 값이 작으면서 경로를 갱신할 수 있을 때
                 if (arr[cx][cy] < arr[nx][ny]) and (dp[nx][ny] < dp[cx][cy]+1):
                     dp[nx][ny] = dp[cx][cy]+1
-                    dq.append((nx, ny))
+                    dq.append((nx, ny, value+1))
 
-max_value = 0    
-for i in range(n):
-    max_value = max(max_value, max(dp[i]))
 print(max_value)
