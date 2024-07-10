@@ -1,42 +1,48 @@
-from collections import deque
+dxs, dys = [-1, 1, 0, 0], [0, 0, -1, 1]
 
-n = int(input())
-arr = [list(map(int, input().split())) for _ in range(n)]
-dp = [[1]*n for _ in range(n)]
-direction = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-max_value = 0
+def in_range(nx, ny):
+    return 0<=nx<n and 0<=ny<n
 
-for i in range(n):
-    for j in range(n):
-        # 이미 갱신이 되어있다 => 탐색할필요가 없지않아?
-        if dp[i][j] > 1:
-            continue
+if __name__=="__main__":
 
-        flag = False
-        for dx, dy in direction:
-            nx, ny = i+dx, j+dy
-            if 0 <= nx < n and 0 <= ny < n and arr[i][j] < arr[nx][ny]:
-                flag = True
-                break
+    n = int(input())
+    board = [list(map(int, input().split())) for _ in range(n)]
+    dp = [[0] * n for _ in range(n)]
 
-        if not flag:
-            continue
+    cells = []
+    ans = 0
 
-        # bfs
-        dq = deque([(i, j, 1)])
+   
+    # 각 칸에 적혀있는 정수값 기준으로
+    # 오름차순이 되도록 칸의 위치들을 정렬합니다.
+    # 편하게 정렬하기 위해
+    # (칸에 적혀있는 값, 행 위치, 열 위치) 순으로 넣어줍니다.
+    for i in range(n):
+        for j in range(n):
+            cells.append((board[i][j], i, j))
 
-        while dq:
-            cx, cy, value = dq.popleft()
-            max_value = max(max_value, value)
-            for dx, dy in direction:
-                nx, ny = cx+dx, cy+dy
-                # 범위에 벗어날 때 
-                if nx < 0 or nx >= n or ny < 0 or ny >= n:
-                    continue
+    # 오름차순으로 정렬을 진행합니다.
+    cells.sort()
 
-                # 값이 작으면서 경로를 갱신할 수 있을 때
-                if (arr[cx][cy] < arr[nx][ny]) and (dp[nx][ny] < dp[cx][cy]+1):
-                    dp[nx][ny] = dp[cx][cy]+1
-                    dq.append((nx, ny, value+1))
+    # 처음 DP 값들은 전부 1로 초기화해줍니다. (해당 칸에서 시작하는 경우)
+    for i in range(n):
+        for j in range(n):
+            dp[i][j] = 1
 
-print(max_value)
+    # 정수값이 작은 칸부터 순서대로 보며
+    # 4방향에 대해 dp 값을 갱신해줍니다.
+    for _, x, y in cells:
+
+        # 인접한 4개의 칸에 대해 갱신을 진행합니다.
+        for dx, dy in zip(dxs, dys):
+            nx = x + dx
+            ny = y + dy
+            if in_range(nx, ny) and board[nx][ny] > board[x][y]:
+                dp[nx][ny] = max(dp[nx][ny], dp[x][y] + 1)
+
+    # 전체 수들 중 최댓값을 찾습니다.
+    for i in range(n):
+        for j in range(n):
+            ans = max(ans, dp[i][j])
+
+    print(ans)
